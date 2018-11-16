@@ -1,6 +1,7 @@
 package com.example.rumaankhalander.contactslist;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
@@ -37,18 +38,25 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ContactsRecyclerAdapter recyclerAdapter;
     private RecyclerView mRecycler;
 
-    public void addContact(String name, String number) {
+    /**
+     * Add contacts into the Contacts list
+     *
+     * @param name   Contact Name
+     * @param number Contact Number
+     */
+    public void addContact(@NonNull String name, @NonNull String number) {
         /* Update locally first */
         contactList.add(new Contact(name, number));
         setUpRecyclerView();
 
         swipeRefreshLayout.setRefreshing(true);
+
+        /* Btw using Java 8 lambdas */
         StringRequest addRequest = new StringRequest(Request.Method.POST, ContactsApi.ADD_CONTACT, response -> {
             Log.d(TAG, "addContact: " + response);
             getAllContacts();
-        }, error -> {
-            Log.e(TAG, "addContact: " + error.getLocalizedMessage(), error);
-        }) {
+        }, error -> Log.e(TAG, "addContact: " + error.getLocalizedMessage(), error))
+                /* Set the POST request Parameters by overriding this method and creating a Map. */ {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
@@ -73,15 +81,23 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         findViewById(R.id.floatingActionButton).setOnClickListener(v -> showDialog());
 
+        /* Initial Loading */
+        swipeRefreshLayout.setRefreshing(true);
         getAllContacts();
     }
 
+    /**
+     * Shows add Contact dialog
+     */
     private void showDialog() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         DialogFragment dialogFragment = AddContactFragment.newInstance();
         dialogFragment.show(ft, "dialog");
     }
 
+    /**
+     * Updates RecyclerView According to the Adapter set
+     */
     private void setUpRecyclerView() {
         if (recyclerAdapter == null) {
             recyclerAdapter = new ContactsRecyclerAdapter(contactList);
@@ -124,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
+    /* Deserialize the JSON received */
     private void parseJson(String response) throws JSONException {
         JSONObject jsonObject = new JSONObject(response);
 
@@ -141,8 +158,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 Contact contact = new Contact(name, number);
                 temp.add(contact);
             }
+            /* Update the main Contacts list rather than adding */
             contactList = new ArrayList<>(temp);
         }
+        /* Signal update complete, hides the progress bar */
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -176,6 +195,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Clears the list of contacts
+     */
     private void clearAll() {
         StringRequest clearRequest = new StringRequest(Request.Method.GET, ContactsApi.CLEAR_CONTACTS, response -> {
             swipeRefreshLayout.setRefreshing(true);
@@ -185,6 +207,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         VolleySingleton.getInstance(this).addToRequestQueue(clearRequest);
     }
 
+    /**
+     * Callback for swipe refresh action
+     */
     @Override
     public void onRefresh() {
         getAllContacts();

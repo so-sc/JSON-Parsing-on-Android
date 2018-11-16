@@ -10,6 +10,12 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
+/**
+ * Volley Request Queue implemented in a Singleton Pattern (aka maintains only one instance of
+ * this class)
+ *
+ * source: @google https://developer.android.com/training/volley/requestqueue#java
+ * */
 public class VolleySingleton {
     private static VolleySingleton mInstance;
     private RequestQueue mRequestQueue;

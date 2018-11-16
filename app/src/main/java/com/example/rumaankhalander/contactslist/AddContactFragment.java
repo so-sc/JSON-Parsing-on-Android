@@ -14,9 +14,7 @@ import android.widget.Button;
 
 public class AddContactFragment extends DialogFragment {
     public static AddContactFragment newInstance() {
-
         Bundle args = new Bundle();
-
         AddContactFragment fragment = new AddContactFragment();
         fragment.setArguments(args);
         return fragment;
@@ -41,14 +39,18 @@ public class AddContactFragment extends DialogFragment {
             final String name = nameEditText.getText().toString();
             final String number = numberEditText.getText().toString();
 
+            /* TODO: handle invalid inputs */
             if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(number)) {
                 ((MainActivity) getActivity()).addContact(name, number);
             }
+
+            /* Dismiss this dialog */
             dismiss();
         });
 
         cancel.setOnClickListener((v) -> dismiss());
 
+        /* Focus on the edit text and show the soft input keyboard */
         nameEditText.requestFocus();
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
